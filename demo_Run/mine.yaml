@@ -1,0 +1,23 @@
+services:
+  api:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgres://postgres:usmankhan123@db:5432/books
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    ports:
+      - "5000:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: usmankhan123
+      POSTGRES_DB: books
+    volumes:
+      - taskdata:/var/lib/postgresql/
+
+volumes:
+  taskdata:
