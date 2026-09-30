@@ -1,10 +1,8 @@
 (function () {
-  // 1. Get Widget ID from the script tag src URL
   const scriptTag = document.currentScript;
   const urlParams = new URLSearchParams(scriptTag.src.split('?')[1]);
   const widgetId = urlParams.get('id');
 
-  // 2. Build floating UI container
   const container = document.createElement('div');
   container.id = 'my-custom-widget';
   container.innerHTML = `
@@ -20,7 +18,6 @@
   `;
   document.body.appendChild(container);
 
-  // 3. Handle Form Submit
   document.getElementById('widget-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const payload = {

@@ -6,6 +6,8 @@ var cors = require("cors");
 const { z } = require('zod');
 const rateLimit = require('express-rate-limit');
 
+router.use(cors());
+
 
 // routes/submissions.js
 router.use((req, res, next) => {
@@ -36,16 +38,16 @@ const submissionLimiter = rateLimit({
 });
 
 const submissionSchema = z.object({
+    widgetId: z.uuid(),
     name: z.string().min(1).max(50),
-    phone: z.number().positive().max(20),
     message: z.string().max(1000),
     email: z.string().max(20)
 });
 
-router.post('/submissions', submissionLimiter, async(req,res) => {
+router.post('/', submissionLimiter, async(req,res) => {
   try {
       const validated = submissionSchema.parse(req.body);
-
+      console.log('validated by zod successfully')
       let location = "nully";
       try {
       const geoRes = await fetch(`https://ipapi.co/${req.ip}/json/`);
@@ -57,14 +59,14 @@ router.post('/submissions', submissionLimiter, async(req,res) => {
         console.log('Geo enrichment failed, continuing anyway...');
       }
 
-        await pool.query(
-          'INSERT INTO submissions (widget_id, sender_name, sender_email, message, geo_location) values ($1,$2,$3,$4,$5)',
-          [validated.widgetId, validated.price, validated.rating]   //check if zod attributes match with this
-        );
-  }catch(err){
-    console.log(res.status(404).json({err:err.message}))
-
-  }
+      await pool.query(
+        'INSERT INTO submissions (widget_id, sender_name, sender_email, message, geo_location) values ($1,$2,$3,$4,$5)',
+        [validated.widgetId, validated.name, validated.email, validated.message, location]   //check if zod attributes match with this
+      );
+      res.status(202).json({uuid:validated.widgetId, name:validated.name, location:location, mail:validated.email, message:validated.message})
+    }catch(err){
+      res.status(402).json({message:"Couldn't insert the data into the DB", err:err.message});
+    }
 });
 
 // const { scrapeBooksFromSite } = require('../scraper/src/index');    ///scraper/src/index.js
@@ -88,32 +90,31 @@ router.post('/submissions', submissionLimiter, async(req,res) => {
 
 //get all
 
-// router.get('/', async (req,res) => {
-//   try{  
-//       var result = await pool.query('SELECT * from books');
-//       res.json(result.rows);
-//   }
-//   catch(err){
-//       // console.log(err);
-//       res.status(504).json({message:"There was an error in retrieving data from the DB"});
-//   }
-// });
+router.get('/', async (req,res) => {
+  try{  
+      var result = await pool.query('SELECT * from submissions');
+      return res.json(result.rows);
+  }
+  catch(err){
+      res.status(504).json({message:"There was an error in retrieving data from the DB"});
+  }
+});
 
-// //get with criteria
-// router.get('/:id', async (req,res) => {
-//   try{
-//     const {id} = req.params;
-//     var result = await pool.query('SELECT * from books where id = $1',[id]);
-//     if(result.rows.length==0){
-//       res.status(403).json({message:"Couldn't find a task associated with that id"})
-//     }else{
-//       res.json(result.rows);
-//     }
-//   }
-//   catch(err){
-//     res.status(504).json({message:"Server error"});
-//   }
-// // });
+//get with criteria
+router.get('/:id', async (req,res) => {
+  try{
+    const {id} = req.params;
+    var result = await pool.query('SELECT * from submissions where id = $1',[id]);
+    if(result.rows.length==0){
+      res.status(403).json({message:"Couldn't find a task associated with that id"})
+    }else{
+      res.json(result.rows);
+    }
+  }
+  catch(err){
+    res.status(504).json({message:"Server error"});
+  }
+});
 
 
 // //create a task
