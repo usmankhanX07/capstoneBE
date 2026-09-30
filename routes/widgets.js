@@ -3,9 +3,8 @@ const router = express.Router();
 const cors = require('cors');
 const pool = require('../daba.js');
 
-// Only allow requests coming from your dashboard frontend (e.g. Live Server or React app)
 const corsOptions = {
-  origin: 'http://127.0.0.1:5500' 
+  origin: process.env.DASHBOARD_URL || 'http://127.0.0.1:5500'
 };
 
 router.use(cors(corsOptions));

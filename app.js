@@ -9,9 +9,8 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-// var itemsRouter = require('./routes/items');
 const authRouter = require('./routes/auth');
-var booksRouter = require('./routes/book')
+// var booksRouter = require('./routes/book')
 var submissionsRouter = require('./routes/submissions')
 var widgetsRouter = require('./routes/widgets')
 
@@ -24,15 +23,14 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));   //if i were to make a public directory, this is how i'd tell express to serve it.
+app.use(express.static(path.join(__dirname, 'public')));  
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-// app.use('/api/items', itemsRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/book', booksRouter);
+// app.use('/api/book', booksRouter);
 app.use('/api/submissions', submissionsRouter)
 app.use('/api/widgets', widgetsRouter)
 
