@@ -61,9 +61,9 @@ router.post('/', submissionLimiter, async(req,res) => {
 
       await pool.query(
         'INSERT INTO submissions (widget_id, sender_name, sender_email, message, geo_location) values ($1,$2,$3,$4,$5)',
-        [validated.widgetId, validated.name, validated.email, validated.message, location]   //check if zod attributes match with this
+        [validated.widgetId, validated.name, validated.email, validated.message, location] 
       );
-      res.status(202).json({uuid:validated.widgetId, name:validated.name, location:location, mail:validated.email, message:validated.message})
+      console.log({uuid:validated.widgetId, name:validated.name, location:location, mail:validated.email, message:validated.message})
     }catch(err){
       res.status(402).json({message:"Couldn't insert the data into the DB", err:err.message});
     }
@@ -89,7 +89,6 @@ router.post('/', submissionLimiter, async(req,res) => {
 // });
 
 //get all
-
 router.get('/', async (req,res) => {
   try{  
       var result = await pool.query('SELECT * from submissions');
@@ -150,17 +149,17 @@ router.get('/:id', async (req,res) => {
 //   }
 // });
 
-// router.delete('/:id', async (req,res) => {
-//   try{
-//     const {id} = req.params;
+router.delete('/:id', async (req,res) => {
+  try{
+    const {id} = req.params;
     
-//     var result = await pool.query('DELETE FROM books WHERE id = $1',[id]);   
-//     res.json({message:"Row(s) deleted successfully"});
-//   }
-//   catch(err){
-//     console.log(err);
-//     res.status(504).json({message:"Server error"});
-//   }
-// });
+    var result = await pool.query('DELETE FROM submissions WHERE id = $1',[id]);   
+    res.json({message:"Row(s) deleted successfully"});
+  }
+  catch(err){
+    console.log(err);
+    res.status(504).json({message:"Server error"});
+  }
+});
 
 module.exports = router;
